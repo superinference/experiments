@@ -74,14 +74,10 @@ For 138 Go instances with cached images: ~400-600 GB total.
 AMI is a single statically-linked binary. No runtime dependencies.
 
 ```bash
-# Download the latest release
-# (replace URL with actual release URL)
-curl -L -o ~/.local/bin/ami <release-url>
-chmod +x ~/.local/bin/ami
+curl -fsSL https://www.superinference.org/install.sh | bash
 
 # Verify installation
 ami --version
-# Expected: superinference v0.7.2-31211636651
 
 # Default location searched by scripts
 # ~/.local/bin/ami
