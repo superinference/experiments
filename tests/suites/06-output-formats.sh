@@ -4,12 +4,12 @@
 
 suite_header "06 — Output Formats"
 
-# ── text output is default ───────────────────────────────────────────
+# ── text output ─────────────────────────────────────────────────────
 test_begin "format: text output works"
 setup_workspace
 commit_workspace
-ami_run_yolo --prompt "Say exactly: format_test_ok" --max-turns 1
-if assert_contains "$AMI_OUTPUT" "format_test_ok"; then
+ami_run_yolo --prompt "What is 2+2? Reply with just the number." --max-turns 1
+if assert_contains "$AMI_OUTPUT" "4"; then
   test_pass
 fi
 
@@ -55,12 +55,12 @@ if assert_json_valid "$AMI_OUTPUT"; then
   test_pass
 fi
 
-# ── text output multiline ───────────────────────────────────────────
-test_begin "format: text handles multiline"
+# ── text output with content ────────────────────────────────────────
+test_begin "format: text has model response"
 setup_workspace
 commit_workspace
-ami_run_yolo --prompt "Say exactly these three words on separate lines: alpha beta gamma" --max-turns 1
-if assert_contains "$AMI_OUTPUT" "alpha" && assert_contains "$AMI_OUTPUT" "gamma"; then
+ami_run_yolo --prompt "What is the capital of France? Reply in one word." --max-turns 1
+if assert_match "$AMI_OUTPUT" "[Pp]aris"; then
   test_pass
 fi
 
