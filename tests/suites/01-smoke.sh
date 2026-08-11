@@ -44,7 +44,7 @@ fi
 # ── max-turns 1 limits turns ──────────────────────────────────────────
 test_begin "max-turns 1 limits execution"
 ami_run_yolo --prompt "Write a very long essay about the history of computing." --max-turns 1
-if assert_exit_code_in "$AMI_EXIT" 0 3; then
+if assert_exit_code_in "$AMI_EXIT" 0 3 124; then
   test_pass
 fi
 

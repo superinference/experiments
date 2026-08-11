@@ -950,7 +950,7 @@ tests/
 │   ├── main.ts
 │   └── multi-file/
 ├── suites/
-│   ├── 01-smoke.sh         # Basic prompt, arithmetic, exit codes
+│   ├── 01-smoke.sh         # Basic prompt, exit codes
 │   ├── 02-tools-read.sh    # file_read tool
 │   ├── 03-tools-write.sh   # file_edit / file_write tools
 │   ├── 04-tools-bash.sh    # bash tool
@@ -967,29 +967,34 @@ tests/
 
 ```bash
 # Run all suites
-SKIP_INSTALL=1 ./tests/run-all.sh
+./tests/run-all.sh
 
 # Run specific suites
-SKIP_INSTALL=1 ./tests/run-all.sh 01 03
+./tests/run-all.sh 01 03
+
+# With Vertex AI (recommended — uses GCP Application Default Credentials)
+env -u AI_API_KEY -u AI_BASE_URL -u HF_TOKEN -u GOOGLE_API_KEY -u OPENAI_API_KEY \
+  AI_MODEL=claude-sonnet-4-6 \
+  CLOUD_ML_REGION=us-east5 \
+  ./tests/run-all.sh
 
 # With a custom provider (e.g., Alibaba Cloud)
-ANTHROPIC_VERTEX_PROJECT_ID= \
-  AI_MODEL=qwen-plus-character \
+env -u ANTHROPIC_VERTEX_PROJECT_ID \
+  AI_MODEL=qwen-flash-character \
   AI_API_KEY="your-key" \
   AI_BASE_URL="https://your-endpoint/compatible-mode/v1" \
-  SKIP_INSTALL=1 \
   ./tests/run-all.sh 01
 ```
 
-**Note:** If `ANTHROPIC_VERTEX_PROJECT_ID` is set in your environment, the runner unsets `AI_API_KEY` to prevent conflicts. Clear it explicitly when using non-Vertex providers.
+**Note:** When `ANTHROPIC_VERTEX_PROJECT_ID` is set in your environment, AMI auto-detects `anthropic-vertex` as the provider. Clear it (or unset conflicting API key env vars) when using non-Vertex providers. `HF_TOKEN`, `AI_API_KEY`, and other provider keys take precedence in the detection chain.
 
 ### 14.3 CI
 
-The GitHub Actions workflow (`.github/workflows/functional-tests.yml`) runs weekly and on manual dispatch. It uses the `AMI_FRITO` repository secret for FRITO credentials.
+The GitHub Actions workflow (`.github/workflows/functional-tests.yml`) runs weekly and on manual dispatch. It uses three repository secrets: `AI_API_KEY`, `AI_BASE_URL`, and `AI_MODEL`.
 
 ### 14.4 Security
 
-All AMI output is piped through a scrubber that redacts API key patterns (`AIzaSy*`, `ya29.*`, `sk-ant-*`, and the first 8 chars of `GOOGLE_API_KEY`). The FRITO config file is written with mode `0600` and cleaned up in the `always()` step.
+All AMI output is piped through a scrubber that redacts API key patterns (`AIzaSy*`, `ya29.*`, `sk-ant-*`, `sk-ws-*`, and the first 8 chars of `AI_API_KEY`). Cleanup runs in the `always()` step.
 
 ---
 

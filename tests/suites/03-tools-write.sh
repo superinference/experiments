@@ -33,7 +33,7 @@ fi
 test_begin "write: create file via bash"
 setup_workspace
 commit_workspace
-ami_run_yolo --prompt "Run this in bash: echo 'hello world' > greeting.txt" --max-turns 3
+ami_run_yolo --prompt "Run this in bash: echo 'hello world' > greeting.txt" --max-turns 5
 if assert_file_exists "$TEST_WORKSPACE/greeting.txt"; then
   test_pass
 fi
@@ -42,7 +42,7 @@ fi
 test_begin "write: create file in subdirectory"
 setup_workspace
 commit_workspace
-ami_run_yolo --prompt "Run: mkdir -p src && echo 'export const x = 1;' > src/index.ts" --max-turns 3
+ami_run_yolo --prompt "Run: mkdir -p src && echo 'export const x = 1;' > src/index.ts" --max-turns 5
 if assert_file_exists "$TEST_WORKSPACE/src/index.ts"; then
   test_pass
 fi

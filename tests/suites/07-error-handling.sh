@@ -62,7 +62,7 @@ fi
 # ── max-turns 0 ──────────────────────────────────────────────────────
 test_begin "error: max-turns 0 exits cleanly"
 set +e
-zero_out=$(ami --prompt "hello" --yolo --output-format text --quiet --max-turns 0 2>&1 | scrub)
+zero_out=$(timeout 60 ami --prompt "hello" --yolo --output-format text --quiet --max-turns 0 2>&1 | scrub)
 zero_exit=$?
 set -e
 if [ "$zero_exit" -eq 0 ] || [ "$zero_exit" -ne 0 ]; then

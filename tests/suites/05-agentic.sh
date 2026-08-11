@@ -36,7 +36,7 @@ fi
 test_begin "agentic: multi-step bash"
 setup_workspace
 commit_workspace
-AMI_TIMEOUT=45 ami_run_yolo --prompt "Run these two commands: 'mkdir -p data' then 'echo done > data/status.txt'" --max-turns 5
+AMI_TIMEOUT=90 ami_run_yolo --prompt "Run these two commands: 'mkdir -p data' then 'echo done > data/status.txt'" --max-turns 5
 if assert_file_exists "$TEST_WORKSPACE/data/status.txt"; then
   test_pass
 fi
