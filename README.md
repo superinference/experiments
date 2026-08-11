@@ -21,7 +21,8 @@ AMI is a statically-linked Go binary that wraps LLM APIs with agentic tool use (
 11. [Retry and Gap Closure](#11-retry-and-gap-closure)
 12. [Submission Generation](#12-submission-generation)
 13. [Operational Procedures](#13-operational-procedures)
-14. [Troubleshooting](#14-troubleshooting)
+14. [Functional Test Suite](#14-functional-test-suite)
+15. [Troubleshooting](#15-troubleshooting)
 
 ---
 
@@ -933,7 +934,66 @@ echo "claude-opus-4-6" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9.-]/-/g'
 
 ---
 
-## 14. Troubleshooting
+## 14. Functional Test Suite
+
+End-to-end tests that verify AMI works correctly against live LLM providers.
+
+### 14.1 Structure
+
+```
+tests/
+├── run-all.sh              # Test runner (discovers and runs suites)
+├── lib/
+│   └── framework.sh        # Assertions, AMI runner, secret scrubbing
+├── fixtures/               # Sample source files for tool tests
+│   ├── buggy.ts
+│   ├── main.ts
+│   └── multi-file/
+├── suites/
+│   ├── 01-smoke.sh         # Basic prompt, arithmetic, exit codes
+│   ├── 02-tools-read.sh    # file_read tool
+│   ├── 03-tools-write.sh   # file_edit / file_write tools
+│   ├── 04-tools-bash.sh    # bash tool
+│   ├── 05-agentic.sh       # Multi-turn agentic behavior
+│   ├── 06-output-formats.sh# json / jsonl / text output
+│   ├── 07-error-handling.sh# Invalid flags, missing files
+│   ├── 08-context.sh       # Context files, stdin
+│   ├── 09-permissions.sh   # Permission modes
+│   └── 10-frito.sh         # FRITO cost-optimization routing
+└── reports/                # Generated test reports (gitignored)
+```
+
+### 14.2 Running Tests
+
+```bash
+# Run all suites
+SKIP_INSTALL=1 ./tests/run-all.sh
+
+# Run specific suites
+SKIP_INSTALL=1 ./tests/run-all.sh 01 03
+
+# With a custom provider (e.g., Alibaba Cloud)
+ANTHROPIC_VERTEX_PROJECT_ID= \
+  AI_MODEL=qwen-plus-character \
+  AI_API_KEY="your-key" \
+  AI_BASE_URL="https://your-endpoint/compatible-mode/v1" \
+  SKIP_INSTALL=1 \
+  ./tests/run-all.sh 01
+```
+
+**Note:** If `ANTHROPIC_VERTEX_PROJECT_ID` is set in your environment, the runner unsets `AI_API_KEY` to prevent conflicts. Clear it explicitly when using non-Vertex providers.
+
+### 14.3 CI
+
+The GitHub Actions workflow (`.github/workflows/functional-tests.yml`) runs weekly and on manual dispatch. It uses the `AMI_FRITO` repository secret for FRITO credentials.
+
+### 14.4 Security
+
+All AMI output is piped through a scrubber that redacts API key patterns (`AIzaSy*`, `ya29.*`, `sk-ant-*`, and the first 8 chars of `GOOGLE_API_KEY`). The FRITO config file is written with mode `0600` and cleaned up in the `always()` step.
+
+---
+
+## 15. Troubleshooting
 
 ### AMI produces no valid JSON output
 

@@ -1,0 +1,46 @@
+name: Functional Tests
+
+on:
+  schedule:
+    - cron: '0 6 * * 0'   # weekly: Sunday 06:00 UTC
+  workflow_dispatch:        # manual trigger
+
+concurrency:
+  group: functional-tests
+  cancel-in-progress: true
+
+jobs:
+  functional-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Install AMI ──────────────────────────────────────────────────
+      - name: Install AMI
+        run: |
+          curl -fsSL https://www.superinference.org/install.sh | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Verify install
+        run: ami --version
+
+      # ── Run test suites ──────────────────────────────────────────────
+      - name: Run functional tests
+        env:
+          AI_API_KEY: ${{ secrets.AI_API_KEY }}
+          AI_BASE_URL: ${{ vars.AI_BASE_URL }}
+          AI_MODEL: ${{ vars.AI_MODEL }}
+        run: |
+          chmod +x tests/run-all.sh
+          chmod +x tests/suites/*.sh
+          tests/run-all.sh
+
+      # ── Cleanup ──────────────────────────────────────────────────────
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f /tmp/ami-scrub.sh
+          rm -rf /tmp/ami-test-workspace
